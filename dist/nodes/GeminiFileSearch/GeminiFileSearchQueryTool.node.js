@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GeminiFileSearchQueryTool = void 0;
-const genai_1 = require("@google/genai");
 class GeminiFileSearchQueryTool {
     constructor() {
         // Extend description to include usableAsTool while maintaining compatibility with current typings
@@ -57,29 +56,35 @@ class GeminiFileSearchQueryTool {
         });
     }
     async execute() {
-        var _a;
+        var _a, _b, _c;
         const items = this.getInputData();
         const returnData = [];
-        const credentials = (await this.getCredentials('geminiApi'));
-        const apiKey = credentials.apiKey || '';
-        const ai = new genai_1.GoogleGenAI({ apiKey, apiVersion: 'v1beta' });
         for (let i = 0; i < items.length; i++) {
             const queryStoreName = this.getNodeParameter('queryStoreName', i);
             const question = this.getNodeParameter('question', i);
             const model = this.getNodeParameter('model', i);
             const includeCitations = this.getNodeParameter('includeCitations', i);
-            const response = await ai.models.generateContent({
-                model,
-                contents: question,
-                config: { tools: [{ fileSearch: { fileSearchStoreNames: [queryStoreName] } }] },
-            });
-            const out = { text: response.text };
-            if (includeCitations) {
-                const candidates = response.candidates || [];
-                const gm = (_a = candidates[0]) === null || _a === void 0 ? void 0 : _a.groundingMetadata;
-                if (gm)
-                    out.groundingMetadata = gm;
+            const options = {
+                method: 'POST',
+                url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+                json: true,
+                body: {
+                    contents: [{ role: 'user', parts: [{ text: question }] }],
+                    tools: [{ fileSearch: { fileSearchStoreNames: [queryStoreName] } }],
+                },
+            };
+            const response = await this.helpers.requestWithAuthentication.call(this, 'geminiApi', options);
+            const candidates = (response === null || response === void 0 ? void 0 : response.candidates) || [];
+            let text = '';
+            try {
+                const parts = ((_b = (_a = candidates[0]) === null || _a === void 0 ? void 0 : _a.content) === null || _b === void 0 ? void 0 : _b.parts) || [];
+                text = parts.map((p) => p === null || p === void 0 ? void 0 : p.text).filter(Boolean).join('\n');
             }
+            catch { }
+            const gm = (_c = candidates[0]) === null || _c === void 0 ? void 0 : _c.groundingMetadata;
+            const out = { text };
+            if (includeCitations && gm)
+                out.groundingMetadata = gm;
             returnData.push(out);
         }
         return [this.helpers.returnJsonArray(returnData)];

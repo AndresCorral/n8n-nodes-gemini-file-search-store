@@ -1,7 +1,7 @@
 {
   "name": "n8n-nodes-gemini-file-search-store",
-  "version": "0.1.3",
-  "description": "n8n community node for Gemini File Search (create store, upload, query)",
+  "version": "0.1.5",
+  "description": "n8n community node for Gemini File Search (cloud-safe query tool)",
   "author": {
     "name": "Andres Corral",
     "email": "andresco70@gmail.com"
@@ -23,6 +23,14 @@
     "dist/**/*",
     "README.md"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndresCorral/n8n-nodes-gemini-file-search-store.git"
+  },
+  "homepage": "https://github.com/AndresCorral/n8n-nodes-gemini-file-search-store#readme",
+  "bugs": {
+    "url": "https://github.com/AndresCorral/n8n-nodes-gemini-file-search-store/issues"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepare": "npm run build && cp nodes/GeminiFileSearch/gemini.svg dist/nodes/GeminiFileSearch/gemini.svg",
@@ -31,9 +39,7 @@
     "lint:fix": "npx @n8n/node-cli lint --fix",
     "release": "npx @n8n/node-cli release"
   },
-  "dependencies": {
-    "@google/genai": "^1.29.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "typescript": "^5.6.3",
     "n8n-workflow": "^1.60.1",

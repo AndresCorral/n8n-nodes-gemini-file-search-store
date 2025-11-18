@@ -5,7 +5,6 @@ import {
 	INodeTypeDescription,
 	IDataObject,
 } from 'n8n-workflow';
-import { GoogleGenAI } from '@google/genai';
 
 export class GeminiFileSearchQueryTool implements INodeType {
 	// Extend description to include usableAsTool while maintaining compatibility with current typings
@@ -64,28 +63,34 @@ export class GeminiFileSearchQueryTool implements INodeType {
 		const items = this.getInputData();
 		const returnData: IDataObject[] = [];
 
-		const credentials = (await this.getCredentials('geminiApi')) as IDataObject;
-		const apiKey = (credentials.apiKey as string) || '';
-		const ai = new GoogleGenAI({ apiKey, apiVersion: 'v1beta' });
-
 		for (let i = 0; i < items.length; i++) {
 			const queryStoreName = this.getNodeParameter('queryStoreName', i) as string;
 			const question = this.getNodeParameter('question', i) as string;
 			const model = this.getNodeParameter('model', i) as string;
 			const includeCitations = this.getNodeParameter('includeCitations', i) as boolean;
 
-			const response = await ai.models.generateContent({
-				model,
-				contents: question,
-				config: { tools: [ { fileSearch: { fileSearchStoreNames: [queryStoreName] } } ] },
-			});
+			const options: any = {
+				method: 'POST',
+				url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+				json: true,
+				body: {
+					contents: [ { role: 'user', parts: [ { text: question } ] } ],
+					tools: [ { fileSearch: { fileSearchStoreNames: [queryStoreName] } } ],
+				},
+			};
 
-			const out: IDataObject = { text: (response as any).text };
-			if (includeCitations) {
-				const candidates = (response as any).candidates || [];
-				const gm = candidates[0]?.groundingMetadata;
-				if (gm) out.groundingMetadata = gm;
-			}
+			const response: any = await (this.helpers as any).requestWithAuthentication.call(this, 'geminiApi', options);
+
+			const candidates = response?.candidates || [];
+			let text = '';
+			try {
+				const parts = candidates[0]?.content?.parts || [];
+				text = parts.map((p: any) => p?.text).filter(Boolean).join('\n');
+			} catch {}
+			const gm = candidates[0]?.groundingMetadata;
+
+			const out: IDataObject = { text };
+			if (includeCitations && gm) out.groundingMetadata = gm;
 			returnData.push(out);
 		}
 
