@@ -1,0 +1,10 @@
+# Archivos de configuración y logs
+node_modules/
+.env
+npm-debug.log
+
+# Carpetas del sistema operativo
+.DS_Store
+Thumbs.db
+
+.tmp_uploads/
