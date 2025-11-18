@@ -1,7 +1,7 @@
 {
   "name": "n8n-nodes-gemini-file-search-store",
-  "version": "0.1.6",
-  "description": "n8n community node for Gemini File Search (cloud-safe query tool)",
+  "version": "0.2.0",
+  "description": "n8n community node for Gemini File Search (cloud-safe store management & query)",
   "author": {
     "name": "Andres Corral",
     "email": "andresco70@gmail.com"
