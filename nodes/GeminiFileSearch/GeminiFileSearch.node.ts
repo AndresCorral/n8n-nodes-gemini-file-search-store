@@ -104,7 +104,7 @@ export class GeminiFileSearch implements INodeType {
       };
 
       // Use credential-based auth to inject x-goog-api-key header from GeminiApi credentials
-      const response: any = await (this.helpers as any).requestWithAuthentication.call(this, 'geminiApi', options);
+      const response: any = await this.helpers.httpRequestWithAuthentication.call(this, 'geminiApi', options);
 
       const candidates = response?.candidates || [];
       let text = '';

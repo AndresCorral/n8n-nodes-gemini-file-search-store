@@ -96,7 +96,7 @@ class GeminiFileSearch {
                 },
             };
             // Use credential-based auth to inject x-goog-api-key header from GeminiApi credentials
-            const response = await this.helpers.requestWithAuthentication.call(this, 'geminiApi', options);
+            const response = await this.helpers.httpRequestWithAuthentication.call(this, 'geminiApi', options);
             const candidates = (response === null || response === void 0 ? void 0 : response.candidates) || [];
             let text = '';
             try {
